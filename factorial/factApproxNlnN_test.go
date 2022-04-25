@@ -51,6 +51,7 @@ func TestFactorialApproximationNlnN(t *testing.T) {
 		if err := diffAbs.Cmp(tolerance); err > 0 {
 			t.Errorf("factorial approximation NlnN (Sterlinga) of %+v want %+v, got %+v", tt.num, tt.want, got)
 		}
+		t.Logf("[PASS] Passed with tolerance [%+v] for values [got: %v - want: %v]", tolerance, got, tt.want)
 	}
 
 }

@@ -5,7 +5,7 @@ type Calculater interface {
 	Factorial(prec uint) string
 }
 
-func InitCalculate(val int64) Calculater {
+func MakeCalculate(val int64) Calculater {
 	var c Calculater
 	switch {
 	// 170 its the last value which can be calculated 171 gives +inf

@@ -72,7 +72,7 @@ func (n *Number) SetNumber64() {
 
 // for small numbers, and using iteration as is better option
 // faster, do not use the staxk memory and is more efficient than recursion
-// it will be used for small number
+// it will be used for numbers from 0 to 170
 func (n *Number) factorialIteraion() *Number {
 	if n != nil {
 		of := n.Value()

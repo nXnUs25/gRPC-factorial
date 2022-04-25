@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestInitCalculate(t *testing.T) {
+func TestMakeCalculate(t *testing.T) {
 
 	tests := []struct {
 		num  int64
@@ -27,11 +27,12 @@ func TestInitCalculate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := InitCalculate(tt.num)
+		got := MakeCalculate(tt.num)
 
 		if reflect.TypeOf(got) != reflect.TypeOf(tt.want) {
 			t.Errorf("InitCalculate type error got %v, want %v", got, tt.want)
 		}
+		t.Logf("[PASS] Initialized Types are as expected got: [%v] and want it [%v]", reflect.TypeOf(got), reflect.TypeOf(tt.want))
 	}
 }
 
@@ -86,11 +87,11 @@ func TestCalculate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		c := InitCalculate(tt.num)
+		c := MakeCalculate(tt.num)
 		got := Calculate(c, prec)
 		if got != tt.want {
-			t.Errorf("wrong value of Calculate for %+v want %+v, got %+v", tt.num, tt.want, got)
+			t.Errorf("Wrong value of Calculate for %+v want %+v, got %+v", tt.num, tt.want, got)
 		}
-		t.Logf("[PASS] Passed value calculated [%s] and want it [%s] are same.", tt.want, got)
+		t.Logf("[PASS] Values calculated [%s] and want it [%s] are same.", tt.want, got)
 	}
 }
