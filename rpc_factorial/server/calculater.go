@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	f "github.com/nXnUs25/gRPC-fact/factorial"
+	f "github.com/nXnUs25/gRPC-factorial/factorial"
 	pb3 "github.com/nXnUs25/gRPC-factorial/rpc_factorial/proto"
 )
 
