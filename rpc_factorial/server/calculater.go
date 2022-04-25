@@ -1,70 +1,69 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	f "github.com/nXnUs25/gRPC-factorial/factorial"
-	pb3 "github.com/nXnUs25/gRPC-factorial/rpc_factorial/proto"
+	"github.com/nXnUs25/gRPC-factorial/factorial"
+	"github.com/nXnUs25/gRPC-factorial/rpc_factorial/proto"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 
-const (
-	varPort = "GRPC_PORT"
-	varPrec = "FACTORIAL_PRECISION"
-)
-
-var (
-	gRPC_Port int
-	prec      uint
-)
-
-type gRPCServer struct {
-	pb3.UnimplementedFactorialServer
+type grpcServer struct {
+	proto.UnimplementedFactorialServer
 }
 
-func (r *gRPCServer) Calculate(req *pb3.CalculateRequest, cs *pb3.CalculateServer) error {
+type FactorialCaller interface {
+	Calculate(int64) string
+}
+
+func (s *grpcServer) Calculate(req *proto.CalculateRequest, pfcs proto.Factorial_CalculateServer) error {
 	nums := req.GetNumbers()
-	var cal f.Calculater
+
+	var fact FactorialCaller = factorial.NewCounter()
+
 	for _, num := range nums {
 		if num > 0 {
-			cal = f.MakeCalculate(num)
-			result := cal.Calculate(cal, prec)
-			cs.Send(&pb3.CalculateResult{
+			result := fact.Calculate(num)
+			pfcs.Send(&proto.CalculateResult{
 				InputNumber:     num,
 				FactorialResult: result,
 			})
-			return nil
 		}
-		return status.Errorf(codes.InvalidArgument, "Invalid number [%v], Factorial can calcualte only positive numbers", num)
+		return status.Errorf(codes.InvalidArgument, "Negative number %+v. Only positive numbers allowed to calculate factorial", num)
 	}
+	return nil
 }
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
 	log.SetPrefix("gRPCServerFactorial: ")
 	log.SetOutput(os.Stdout)
+	SetGRPCPort(readGRPCPort())
 	log.Printf("Starting... GRPC server on port %d\n", GRPCPort())
 
-	l, err := grpc.Listen("tcp", "127.0.0.1:"+GRPCPort())
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "localhost", GRPCPort()))
 	if err != nil {
 		log.Printf("Cannot open port [%v]", GRPCPort())
 		log.Fatal(err)
 	}
 	server := grpc.NewServer()
 	defer server.Stop()
-	pb.RegisterFactorialServer(server, &gRPCServer{})
-	log.Printf("Server started at port [%v]", l.Addr().String)
-	if err := server.Serve(); err != nil {
-		log.Println("Failed to Start")
-		log.Fatal(err)
+	proto.RegisterFactorialServer(server, &grpcServer{})
+	log.Printf("Server started at port [%v]", listener.Addr())
+
+	if err := server.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
+
 	sChan := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 	signal.Notify(sChan, syscall.SIGINT, syscall.SIGTERM)
@@ -77,7 +76,16 @@ func main() {
 	<-done
 	log.Println("Sopping GRPC Server.")
 	server.GracefulStop()
+
 }
+
+const (
+	varPort = "GRPC_PORT"
+)
+
+var (
+	gRPC_Port int
+)
 
 func GRPCPort() int {
 	return gRPC_Port
@@ -94,17 +102,4 @@ func readGRPCPort() int {
 		return 5100
 	}
 	return port
-}
-
-func Prec() uint {
-	return prec
-}
-
-func readPrecision() uint {
-	prec, err := strconv.Atoi(os.Getenv(varPrec))
-	if err != nil {
-		log.Printf("Failed to load precision variable [%v] trying default value number [%v]", varPrec, 64)
-		return uint(64)
-	}
-	return uint(prec)
 }

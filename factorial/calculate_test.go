@@ -1,8 +1,10 @@
 package factorial
 
 import (
+	"math"
 	"math/big"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -27,12 +29,13 @@ func TestMakeCalculate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := MakeCalculate(tt.num)
+		got := makeCalculater(tt.num)
 
 		if reflect.TypeOf(got) != reflect.TypeOf(tt.want) {
-			t.Errorf("InitCalculate type error got %v, want %v", got, tt.want)
+			t.Errorf("[FAIL] InitCalculate type error got %v, want %v", got, tt.want)
+		} else {
+			t.Logf("[PASS] Initialized Types are as expected got: [%v] and want it [%v]", reflect.TypeOf(got), reflect.TypeOf(tt.want))
 		}
-		t.Logf("[PASS] Initialized Types are as expected got: [%v] and want it [%v]", reflect.TypeOf(got), reflect.TypeOf(tt.want))
 	}
 }
 
@@ -47,7 +50,7 @@ func TestCalculate(t *testing.T) {
 	if !ok {
 		t.Errorf("cannot parse %v", bigNum)
 	}
-	hugeNum, _ := new(big.Float).SetPrec(prec).SetString("1.066635187e+11")
+	hugeNum, ok := new(big.Float).SetPrec(prec).SetString("1.066635187e+11")
 	if !ok {
 		t.Errorf("cannot parse %v", hugeNum)
 	}
@@ -87,11 +90,28 @@ func TestCalculate(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		c := MakeCalculate(tt.num)
-		got := Calculate(c, prec)
-		if got != tt.want {
-			t.Errorf("Wrong value of Calculate for %+v want %+v, got %+v", tt.num, tt.want, got)
+		c := NewCounter()
+		SetPrec(prec)
+		got := c.Calculate(tt.num)
+		tolerance := new(big.Float).SetPrec(prec).SetFloat64(float64(math.Pow10(-int(prec))))
+
+		bigWant, ok := new(big.Float).SetPrec(prec).SetString(strings.Trim(tt.want, "e^"))
+		if !ok {
+			t.Errorf("[FAIL] Cannot parse %v", tt.want)
 		}
-		t.Logf("[PASS] Values calculated [%s] and want it [%s] are same.", tt.want, got)
+
+		bigGot, ok := new(big.Float).SetPrec(prec).SetString(strings.Trim(got, "e^"))
+		if !ok {
+			t.Errorf("[FAIL] Cannot parse %v", tt.want)
+		}
+
+		diff := bigWant.Sub(bigWant, bigGot).SetPrec(prec)
+		diffAbs := diff.Abs(diff)
+
+		if err := diffAbs.Cmp(tolerance); err > 0 {
+			t.Errorf("[FAIL] Get value of Calculate with tolerance [%v] for [%v] want [%v], got [%v]", tolerance, tt.num, tt.want, got)
+		} else {
+			t.Logf("[PASS] Values calculated [%s] and want it [%s] are same.", tt.want, got)
+		}
 	}
 }

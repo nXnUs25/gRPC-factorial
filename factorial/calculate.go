@@ -5,7 +5,15 @@ type Calculater interface {
 	Factorial(prec uint) string
 }
 
-func MakeCalculate(val int64) Calculater {
+var prec uint = 64
+
+type Counter struct{}
+
+func NewCounter() *Counter {
+	return &Counter{}
+}
+
+func makeCalculater(val int64) Calculater {
 	var c Calculater
 	switch {
 	// 170 its the last value which can be calculated 171 gives +inf
@@ -25,9 +33,18 @@ func MakeCalculate(val int64) Calculater {
 	}
 }
 
-func Calculate(c Calculater, prec uint) string {
+func (s *Counter) Calculate(value int64) string {
+	c := makeCalculater(value)
 	if c != nil {
-		return c.Factorial(prec)
+		return c.Factorial(Prec())
 	}
 	return "NaN"
+}
+
+func SetPrec(p uint) {
+	prec = p
+}
+
+func Prec() uint {
+	return prec
 }

@@ -5,7 +5,7 @@ option go_package = "rpc_factorial/proto" ;
 // Factorial is service which calculate factorial described https://en.wikipedia.org/wiki/Factorial
 service Factorial {
     // Calculate should be make async actions result should be returned asap
-    rpc Calculate (CalculateRequest) returns (stream CalculateResult);
+    rpc Calculate (CalculateRequest) returns (stream CalculateResult) {};
 }
 
 //  CalculateRequest is request with numbers for which should be calculating factorial 

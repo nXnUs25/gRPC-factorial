@@ -72,9 +72,9 @@ func TestFactorialIteraion(t *testing.T) {
 
 		if err := diffAbs.Cmp(tolerance); err > 0 {
 			t.Errorf("factorial iteration of %+v want %+v, got %+v", tt.num, tt.want, got)
+		} else {
+			t.Logf("[PASS] Passed with tolerance [%+v] for values [got: %v - want: %v]", tolerance, got, tt.want)
 		}
-
-		t.Logf("[PASS] Passed with tolerance [%+v] for values [got: %v - want: %v]", tolerance, got, tt.want)
 	}
 
 }
