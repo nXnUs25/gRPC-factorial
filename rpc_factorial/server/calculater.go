@@ -29,16 +29,15 @@ func (s *grpcServer) Calculate(req *proto.CalculateRequest, pfcs proto.Factorial
 	nums := req.GetNumbers()
 
 	var fact FactorialCaller = factorial.NewCounter()
-
 	for _, num := range nums {
-		if num > 0 {
-			result := fact.Calculate(num)
-			pfcs.Send(&proto.CalculateResult{
-				InputNumber:     num,
-				FactorialResult: result,
-			})
+		if num < 0 {
+			return status.Errorf(codes.InvalidArgument, "Negative number %+v. Only positive numbers allowed to calculate factorial", num)
 		}
-		return status.Errorf(codes.InvalidArgument, "Negative number %+v. Only positive numbers allowed to calculate factorial", num)
+		result := fact.Calculate(num)
+		pfcs.Send(&proto.CalculateResult{
+			InputNumber:     num,
+			FactorialResult: result,
+		})
 	}
 	return nil
 }
@@ -48,7 +47,7 @@ func main() {
 	log.SetPrefix("gRPCServerFactorial: ")
 	log.SetOutput(os.Stdout)
 	SetGRPCPort(readGRPCPort())
-	log.Printf("Starting... GRPC server on port %d\n", GRPCPort())
+	log.Printf("Starting... GRPC client on port %d\n", GRPCPort())
 
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "localhost", GRPCPort()))
 	if err != nil {
