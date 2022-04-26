@@ -4,7 +4,7 @@ GoLang Test Task
 
 # Usage
 
-To run the application after bulding binaris open separate window in terminal and execute the command `./calculater_server`
+To run the application after building binaries open separate window in terminal and execute the command `./calculater_server`
 
 ```shell
 ❯ ./calculater_server
