@@ -49,7 +49,7 @@ func main() {
 	SetGRPCPort(readGRPCPort())
 	log.Printf("Starting... GRPC client on port %d\n", GRPCPort())
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "localhost", GRPCPort()))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "0.0.0.0", GRPCPort()))
 	if err != nil {
 		log.Printf("Cannot open port [%v]", GRPCPort())
 		log.Fatal(err)
